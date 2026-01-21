@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/41fc5bbd-635e-4075-805d-18e7465a1a72" />
+
 # 🧠 KnowledgeSync
 
 ## Cross-Agent Knowledge Synchronization for Team Brain
@@ -917,6 +919,9 @@ sync_knowledge() -> Dict[str, int]
 ```
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/34fc3e78-c94f-48ca-8dcc-64891d5fb679" />
+
 
 ## 📝 Credits
 
