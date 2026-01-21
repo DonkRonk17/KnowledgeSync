@@ -1,0 +1,336 @@
+================================================================================
+KNOWLEDGESYNC CHEAT SHEET
+Cross-Agent Knowledge Synchronization for Team Brain
+================================================================================
+
+QUICK START
+-----------
+1. Import: from knowledgesync import KnowledgeSync
+2. Initialize: ks = KnowledgeSync("AGENT_NAME")
+3. Add: ks.add("content", category="FACT", topics=["topic1"])
+4. Query: ks.query("search term")
+
+================================================================================
+COMMON COMMANDS
+--------------------------------------------------------------------------------
+
+Add Knowledge:
+  # Basic
+  ks.add("Content here")
+  
+  # With details
+  ks.add("Content", category="FINDING", topics=["topic1", "topic2"],
+         confidence=0.9, expires_in_days=30)
+  
+  # CLI
+  knowledgesync add "Content" --category FINDING --topics topic1 topic2
+
+Query Knowledge:
+  # By content
+  ks.query("search term")
+  
+  # By source
+  ks.query(source="FORGE")
+  
+  # By topics
+  ks.query(topics=["costs", "budget"])
+  
+  # Combined
+  ks.query("search", source="ATLAS", category="FINDING", min_confidence=0.7)
+  
+  # CLI
+  knowledgesync query "search term" --source ATLAS --category FINDING
+
+Agent Queries:
+  # What does FORGE know?
+  ks.query_agent("FORGE")
+  
+  # What does ATLAS know about testing?
+  ks.query_agent("ATLAS", "testing")
+  
+  # CLI
+  knowledgesync agent FORGE --topic testing
+
+================================================================================
+CATEGORIES
+--------------------------------------------------------------------------------
+
+DECISION    - Choices made ("We will use SynapseLink")
+FINDING     - Discoveries ("TokenTracker costs $0.50/day")
+PROBLEM     - Issues identified ("BCH not connecting")
+SOLUTION    - Fixes implemented ("Added CORS headers")
+TODO        - Action items ("Need to add caching")
+REFERENCE   - Documentation links
+CONFIG      - Configuration settings
+RELATIONSHIP- Connections between concepts
+FACT        - General information
+INSIGHT     - Observations and analysis
+
+================================================================================
+CONFIDENCE LEVELS
+--------------------------------------------------------------------------------
+
+CERTAIN     1.0    Verified, 100% confident
+HIGH        0.8    Very likely correct
+MEDIUM      0.6    Probably correct
+LOW         0.4    May be correct
+UNCERTAIN   0.2    Needs verification
+
+from knowledgesync import CONFIDENCE_LEVELS
+ks.add("...", confidence=CONFIDENCE_LEVELS["HIGH"])
+
+================================================================================
+CLI COMMANDS
+--------------------------------------------------------------------------------
+
+knowledgesync add "content"           # Add knowledge
+knowledgesync query "search"          # Search knowledge
+knowledgesync agent FORGE             # Query agent's knowledge
+knowledgesync topics                  # List all topics
+knowledgesync related "python"        # Find related topics
+knowledgesync stats                   # Show statistics
+knowledgesync extract file.md         # Extract from file
+knowledgesync sync                    # Save current state
+knowledgesync sync --export out.json  # Export to file
+knowledgesync sync --import in.json   # Import from file
+knowledgesync delete <entry_id>       # Delete entry
+
+================================================================================
+CLI FLAGS
+--------------------------------------------------------------------------------
+
+Global:
+  --version              Show version
+  
+Add:
+  --category, -c         Category (DECISION, FINDING, etc.)
+  --topics, -t           Topics (space-separated)
+  --source, -s           Source agent
+  --confidence, -C       Confidence level (0.0-1.0)
+  --expires, -e          Expire in N days
+
+Query:
+  --source, -s           Filter by source agent
+  --category, -c         Filter by category
+  --topics, -t           Filter by topics
+  --min-confidence, -C   Minimum confidence
+  --limit, -l            Max results (default 20)
+  --related, -r          Include related topics
+
+Agent:
+  --topic, -t            Optional topic filter
+
+Topics:
+  --limit, -l            Max topics to show
+
+Related:
+  --depth, -d            Relation depth (default 2)
+
+================================================================================
+PYTHON API QUICK REFERENCE
+--------------------------------------------------------------------------------
+
+Initialization:
+  ks = KnowledgeSync("AGENT")
+  ks = KnowledgeSync("AGENT", storage_dir=Path("/custom"))
+  ks = KnowledgeSync("AGENT", auto_sync=False)
+
+CRUD:
+  entry = ks.add(content, category, topics, confidence, expires_in_days)
+  entry = ks.update(entry_id, content, confidence)
+  success = ks.delete(entry_id)
+  entry = ks.get(entry_id)
+
+Queries:
+  results = ks.query(search, source, category, topics, min_confidence)
+  results = ks.query_agent("FORGE", "topic")
+  topics = ks.get_topics()
+  related = ks.get_related_topics("python", depth=2)
+
+Sync:
+  ks.sync()
+  data = ks.export_for_sync()
+  stats = ks.import_from_sync(data)
+
+Extraction:
+  entries = ks.extract_from_text(text, topics)
+  entries = ks.extract_from_session(Path("file.md"), topics)
+
+Subscriptions:
+  ks.subscribe("topic", callback_function)
+  ks.unsubscribe("topic", callback_function)
+
+Utility:
+  stats = ks.get_stats()
+  count = ks.cleanup_expired()
+  ks.clear(confirm=True)
+
+================================================================================
+CONVENIENCE FUNCTIONS
+--------------------------------------------------------------------------------
+
+from knowledgesync import (
+    add_knowledge,
+    query_knowledge,
+    what_does_agent_know,
+    sync_knowledge
+)
+
+# Quick add
+add_knowledge("content", category="FACT", topics=["topic"])
+
+# Quick query
+results = query_knowledge("search")
+
+# Agent query
+results = what_does_agent_know("FORGE", "topic")
+
+# Force sync
+sync_knowledge()
+
+================================================================================
+KNOWLEDGE ENTRY ATTRIBUTES
+--------------------------------------------------------------------------------
+
+entry.entry_id      str         Unique identifier
+entry.content       str         Knowledge content
+entry.source        str         Agent that created it (uppercase)
+entry.category      str         Category (DECISION, FINDING, etc.)
+entry.topics        List[str]   Related topics (lowercase)
+entry.confidence    float       0.0 to 1.0
+entry.created       datetime    Creation timestamp
+entry.updated       datetime    Last update timestamp
+entry.expires       datetime    Optional expiration
+entry.references    List[str]   Related entry IDs
+entry.metadata      dict        Custom metadata
+
+entry.to_dict()                 Convert to JSON-serializable dict
+entry.is_expired()              Check if expired
+entry.matches_query("search")   Check if matches search
+
+================================================================================
+KNOWLEDGE GRAPH
+--------------------------------------------------------------------------------
+
+Get topics:
+  topics = ks.get_topics()  # [(topic, count), ...]
+
+Find related:
+  related = ks.get_related_topics("python", depth=2)
+
+Query with related:
+  results = ks.query(topics=["python"], include_related=True)
+
+================================================================================
+EXTRACTION PATTERNS
+--------------------------------------------------------------------------------
+
+Auto-detected patterns in text:
+  Finding: ...       → FINDING
+  Decision: ...      → DECISION
+  Problem: ...       → PROBLEM
+  Solution: ...      → SOLUTION
+  TODO: ...          → TODO
+  Note: ...          → FACT
+  Insight: ...       → INSIGHT
+  Config: ...        → CONFIG
+  Configuration: ... → CONFIG
+
+================================================================================
+INTEGRATION WITH OTHER TOOLS
+--------------------------------------------------------------------------------
+
+With SynapseLink:
+  from synapselink import quick_send
+  from knowledgesync import KnowledgeSync
+  
+  ks = KnowledgeSync("ATLAS")
+  entry = ks.add("Important finding", category="FINDING")
+  quick_send("TEAM", f"New {entry.category}", entry.content)
+
+With AgentHealth:
+  from agenthealth import AgentHealth
+  from knowledgesync import KnowledgeSync
+  
+  health = AgentHealth()
+  ks = KnowledgeSync("ATLAS")
+  health.start_session("ATLAS")
+  ks.add("Session learning", topics=["session"])
+
+With SessionReplay:
+  from sessionreplay import SessionReplay
+  from knowledgesync import KnowledgeSync
+  
+  replay = SessionReplay()
+  ks = KnowledgeSync("ATLAS")
+  session_log = replay.export_session(session_id)
+  ks.extract_from_text(session_log)
+
+================================================================================
+FILE LOCATIONS
+--------------------------------------------------------------------------------
+
+Default Storage:
+  ~/.knowledgesync/
+  
+Team Brain (if exists):
+  D:/BEACON_HQ/MEMORY_CORE_V2/04_KNOWLEDGE_BASE/knowledge_sync/
+
+Files Created:
+  entries.json    - All knowledge entries
+  graph.json      - Knowledge graph (topics/relationships)
+  sync_log.json   - Sync history
+
+================================================================================
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+No entries found:
+  knowledgesync stats       # Check if storage has data
+  knowledgesync query       # Return all entries
+
+Import conflicts:
+  knowledgesync delete ID   # Delete conflicting entry
+  knowledgesync sync --import file.json
+
+Permission denied:
+  ks = KnowledgeSync(storage_dir=Path.home() / "my_knowledge")
+
+Corrupt storage:
+  # Delete files in storage_dir and start fresh
+  rm ~/.knowledgesync/*.json
+
+================================================================================
+BEST PRACTICES
+--------------------------------------------------------------------------------
+
+1. Always specify source agent
+2. Use consistent topics (lowercase, hyphenated)
+3. Set appropriate confidence levels
+4. Add expiration for temporary knowledge
+5. Link related entries with references
+6. Extract knowledge from session logs
+7. Sync regularly for backup
+
+================================================================================
+RESOURCES
+--------------------------------------------------------------------------------
+
+Documentation:   README.md
+Examples:        EXAMPLES.md
+Integration:     INTEGRATION_PLAN.md
+Quick Starts:    QUICK_START_GUIDES.md
+Patterns:        INTEGRATION_EXAMPLES.md
+GitHub:          https://github.com/DonkRonk17/KnowledgeSync
+
+================================================================================
+VERSION INFO
+--------------------------------------------------------------------------------
+
+KnowledgeSync v1.0.0
+Q-Mode Tool #16 (Tier 2: Workflow Enhancement)
+Built by: Forge (Team Brain)
+For: Logan Smith / Metaphy LLC
+Date: January 21, 2026
+
+================================================================================

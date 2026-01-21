@@ -1,0 +1,11 @@
+# KnowledgeSync - Requirements
+# ============================
+# Zero external dependencies!
+# This tool uses only Python standard library.
+#
+# Python 3.7+ required for:
+# - pathlib
+# - datetime.fromisoformat()
+# - typing module features
+#
+# No pip install needed.
